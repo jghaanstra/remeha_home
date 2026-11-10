@@ -2,14 +2,10 @@
 
 This integration lets you control your Remeha Home thermostats from Home Assistant.
 
-This is a fork of [msvisser/remeha_home](https://github.com/msvisser/remeha_home), which is no longer actively maintained.
-It adds hot water control, heat pump and cooling support, energy data per heat source, holiday mode and more, collected from community pull requests and tested on a live system.
-Please report problems in the [issues of this repository](https://github.com/hugo-leij/remeha_home/issues), and attach the [diagnostics](#diagnostics) if you can.
-
 > [!WARNING]
 > **Disclaimer**
 >
-> This fork has merged a selection of pull requests from the original repository and fixes a couple of deprecation warnings in Home Assistant mainly for my own use. AI was used to perform these merges and fixes. Use this fork at your own risk.
+> This is a fork of [msvisser/remeha_home](https://github.com/msvisser/remeha_home), which is no longer actively maintained. The fork has merged a selection of pull requests from the original repository and fixes a couple of deprecation warnings in Home Assistant mainly for my own use. AI was used to perform these merges and fixes. Use this fork at your own risk.
 > 
 > ### Added
 > * Merged https://github.com/msvisser/remeha_home/pull/122
