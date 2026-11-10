@@ -47,13 +47,6 @@ OPERATION_TO_REMEHA_DHW_MODE = {
 }
 
 
-# Home Assistant 2026.11 gave climate and water heater entities native temperature
-# members (native_temperature_unit, native_current_temperature and
-# native_target_temperature) and deprecated the old names until 2027.11. Earlier
-# versions only know the old names, so the entities use whichever this version has.
-NATIVE_TEMPERATURE_MEMBERS = hasattr(WaterHeaterEntity, "native_temperature_unit")
-
-
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -81,10 +74,7 @@ class RemehaHomeWaterHeater(CoordinatorEntity, WaterHeaterEntity):
         WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.OPERATION_MODE
     )
-    if NATIVE_TEMPERATURE_MEMBERS:
-        _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
-    else:
-        _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key = "remeha_home_dhw"
     _attr_has_entity_name = True
     _attr_name = None
@@ -142,12 +132,8 @@ class RemehaHomeWaterHeater(CoordinatorEntity, WaterHeaterEntity):
         """Return the current DHW temperature."""
         return self._data.get("dhwTemperature")
 
-    if NATIVE_TEMPERATURE_MEMBERS:
-        native_target_temperature = property(_active_setpoint)
-        native_current_temperature = property(_dhw_temperature)
-    else:
-        target_temperature = property(_active_setpoint)
-        current_temperature = property(_dhw_temperature)
+    native_target_temperature = property(_active_setpoint)
+    native_current_temperature = property(_dhw_temperature)
 
     @property
     def min_temp(self) -> float | None:
