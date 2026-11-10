@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from awesomeversion import AwesomeVersion
 from homeassistant.components.water_heater import (
     STATE_ECO,
     STATE_HIGH_DEMAND,
@@ -13,7 +14,12 @@ from homeassistant.components.water_heater import (
     WaterHeaterEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE, PRECISION_HALVES, UnitOfTemperature
+from homeassistant.const import (
+    ATTR_TEMPERATURE,
+    PRECISION_HALVES,
+    UnitOfTemperature,
+    __version__ as HA_VERSION,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity import DeviceInfo
@@ -31,6 +37,9 @@ from .util import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Home Assistant 2026.11 introduced native temperature members for water heaters.
+NATIVE_TEMPERATURE_MEMBERS = AwesomeVersion(HA_VERSION) >= AwesomeVersion("2026.11.0")
 
 REMEHA_DHW_MODE_TO_OPERATION = {
     "ContinuousComfort": STATE_PERFORMANCE,
@@ -74,7 +83,10 @@ class RemehaHomeWaterHeater(CoordinatorEntity, WaterHeaterEntity):
         WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.OPERATION_MODE
     )
-    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
+    if NATIVE_TEMPERATURE_MEMBERS:
+        _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
+    else:
+        _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key = "remeha_home_dhw"
     _attr_has_entity_name = True
     _attr_name = None
@@ -132,8 +144,12 @@ class RemehaHomeWaterHeater(CoordinatorEntity, WaterHeaterEntity):
         """Return the current DHW temperature."""
         return self._data.get("dhwTemperature")
 
-    native_target_temperature = property(_active_setpoint)
-    native_current_temperature = property(_dhw_temperature)
+    if NATIVE_TEMPERATURE_MEMBERS:
+        native_target_temperature = property(_active_setpoint)
+        native_current_temperature = property(_dhw_temperature)
+    else:
+        target_temperature = property(_active_setpoint)
+        current_temperature = property(_dhw_temperature)
 
     @property
     def min_temp(self) -> float | None:

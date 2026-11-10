@@ -36,4 +36,6 @@ jobs:
             # Remove this 'ignore' key when you have added brand images for your integration to https://github.com/home-assistant/brands
             # The original repository (msvisser/remeha_home) has no license and only its
             # authors can add one, so this fork skips the license check
-            ignore: "brands license"
+            # This fork also skips repository settings checks (topics/issues) that are
+            # managed in GitHub repository settings rather than code.
+            ignore: "brands license topics issues"

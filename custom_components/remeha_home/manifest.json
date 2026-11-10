@@ -7,6 +7,9 @@
   "config_flow": true,
   "documentation": "https://github.com/hugo-leij/remeha_home",
   "integration_type": "device",
+  "categories": [
+    "climate"
+  ],
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/hugo-leij/remeha_home/issues",
   "version": "0.0.0"

@@ -5,6 +5,7 @@ from datetime import timedelta
 from typing import Any
 import logging
 
+from awesomeversion import AwesomeVersion
 import voluptuous as vol
 
 from homeassistant.components.climate import (
@@ -15,7 +16,12 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE, PRECISION_HALVES, UnitOfTemperature
+from homeassistant.const import (
+    ATTR_TEMPERATURE,
+    PRECISION_HALVES,
+    UnitOfTemperature,
+    __version__ as HA_VERSION,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, entity_platform
@@ -42,6 +48,9 @@ ATTR_DURATION = "duration"
 # The Remeha API doesn't document a limit; one week is a reasonable maximum
 MIN_OVERRIDE_DURATION = timedelta(minutes=1)
 MAX_OVERRIDE_DURATION = timedelta(days=7)
+
+# Home Assistant 2026.11 introduced native temperature members for climate entities.
+NATIVE_TEMPERATURE_MEMBERS = AwesomeVersion(HA_VERSION) >= AwesomeVersion("2026.11.0")
 
 
 def manual_hvac_mode(can_cool: bool) -> HVACMode:
@@ -136,7 +145,10 @@ class RemehaHomeClimateEntity(CoordinatorEntity, ClimateEntity):
         | ClimateEntityFeature.TURN_OFF
         | ClimateEntityFeature.TURN_ON
     )
-    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
+    if NATIVE_TEMPERATURE_MEMBERS:
+        _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
+    else:
+        _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_precision = PRECISION_HALVES
     _attr_has_entity_name = True
     _attr_name = None
@@ -223,8 +235,12 @@ class RemehaHomeClimateEntity(CoordinatorEntity, ClimateEntity):
             return None
         return self._data["setPoint"]
 
-    native_current_temperature = property(_room_temperature)
-    native_target_temperature = property(_setpoint)
+    if NATIVE_TEMPERATURE_MEMBERS:
+        native_current_temperature = property(_room_temperature)
+        native_target_temperature = property(_setpoint)
+    else:
+        current_temperature = property(_room_temperature)
+        target_temperature = property(_setpoint)
 
     @property
     def min_temp(self) -> float:
